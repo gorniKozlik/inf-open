@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+#define endl "\n"
+
+using namespace std;
+
+void speed()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+}
+
+
+const int MAXN = 4e5+5;///2*n
+
+int n,q;
+pair<int,int> p[MAXN];
+
+bool cmp(pair<int,int> p1, pair<int,int > p2)
+{
+    return p1.second < p2.second;
+}
+bool cmpse(pair<int,int> p1, pair<int,int> p2)
+{
+    if(p1.first == p2.first) return p1.second > p2.second;
+    return p1.first < p2.first;
+}
+int used[MAXN];
+map<int,int>mymap;
+void compress()
+{
+    vector<int>v;
+    for(int i = 1; i <= n; i++)
+    {
+        v.push_back(p[i].first);
+        v.push_back(p[i].second);
+    }
+
+    sort(v.begin(),v.end());
+    mymap[v[0]] = 1;
+    int idx = 1;
+    for(int i = 1; i < v.size(); i++)
+    {
+        if(v[i-1] != v[i]) idx++;
+        mymap[v[i]] = idx;
+    }
+    for(int i = 1; i <= n; i++)
+    {
+        p[i].first = mymap[p[i].first];
+        p[i].second = mymap[p[i].second];
+    }
+}
+
+void read()
+{
+    cin >> n >> q;
+    for(int i = 1; i <= n; i++)
+    {
+        cin >> p[i].first >> p[i].second;
+    }
+    compress();
+    //cout << "After compress" << endl;
+    //for(int i = 1; i <= n; i++) cout << p[i].first << " " << p[i].second << endl;
+    sort(p+1,p+n+1,cmpse);
+}
+
+long long dul[MAXN];
+//long long dp[MAXN][MAXN];
+void solve()
+{
+    for(int i = 0; i <= n; i++) dul[i] = 1e18;
+
+    vector<int>c;
+    for(int i = 1; i <= n; i++) c.push_back(p[i].second);
+    sort(c.begin(),c.end());
+    reverse(c.begin(),c.end());
+
+    long long out = 0;
+    for(int i = 1; i <= n; i++) if(p[i].second != c[i-1]) out++;
+
+    int k;
+    for(int i = 1; i <= q; i++)
+    {
+        cin >> k;
+        cout << (out+1)/2 << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    read();
+    solve();
+    return 0;
+}

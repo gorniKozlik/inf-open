@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+constexpr int INF = 1e9 + 7;
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    int n, q;
+    cin >> n >> q;
+    vector<int>h;
+    vector<pair<int, int>>a(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> a[i].first >> a[i].second;
+        h.push_back(a[i].first);
+        h.push_back(a[i].second);
+    }
+    sort(h.begin(), h.end());
+    h.resize(unique(h.begin(), h.end()) - h.begin());
+    for (auto &[l, r] : a) {
+        l = lower_bound(h.begin(), h.end(), l) - h.begin();
+        r = lower_bound(h.begin(), h.end(), r) - h.begin();
+    }
+    // int middle = n - 1;
+    // int cntleft = 0, cntright = 0;
+    // for (auto [l, r] : a) {
+    //     if (r <= middle) ++cntleft;
+    //     if (l > middle) ++cntright;
+    // }
+    // ans[n] = cntleft;
+    vector<int>ans(n + 1, INF);
+    vector<pair<int, int>>ev;
+    for (int i =0 ; i < n; ++i) {
+        ev.push_back({a[i].first , 1});
+        ev.push_back({a[i].second, -1});
+    }
+    sort(ev.begin(), ev.end());
+    int cntleft = 0, cntright = n;
+    vector<int>mxels(n + 5);
+    int ind = 0;
+    for (auto [x, t] : ev) {
+        if (t == 1) {
+            --cntright;
+        }
+        else {
+            ++cntleft;
+        }
+        ++ind;
+        int els = n - cntleft - cntright;
+        mxels[min(ind, 2 * n - ind)] = max(mxels[min(ind, 2 * n - ind)], els);
+        // for (int cur = 1; cur <= min(ind, 2 * n - ind); ++cur) {
+        //     //int cur = min(ind, 2 * n - ind);
+        //     ans[cur] = min(ans[cur], max(0, cur - els + 1) / 2);
+        // }
+    }
+
+    for (int i = n; i > 0; --i) {
+        mxels[i] = max(mxels[i], mxels[i + 1]);
+        ans[i] = (i - mxels[i] + 1) / 2;
+    }
+    while (q--) {
+        int x;
+        cin >> x;
+        cout <<ans[x]<<" ";
+    }
+}

@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <array>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+struct Node {
+    int l, r;
+
+    bool is_intersect(const Node &that) const {
+        return this->l <= that.l && that.l <= this->r || this->l <= that.r && that.r <= this->r;
+    }
+};
+
+signed main() {
+    int n, q;
+    cin >> n >> q;
+
+    vector<int> xs;
+    vector<Node> a(n);
+
+    for (int i = 0; i < n; ++i) {
+        int l, r;
+        cin >> l >> r;
+        
+        xs.push_back(l);
+        xs.push_back(r);
+        a[i] = {l, r};
+    }
+
+    sort(xs.begin(), xs.end());
+    xs.resize(unique(xs.begin(), xs.end()) - xs.begin());
+    int m = xs.size();
+
+    for (int i = 0; i < n; ++i) {
+        a[i].l = lower_bound(xs.begin(), xs.end(), a[i].l) - xs.begin();
+        a[i].r = lower_bound(xs.begin(), xs.end(), a[i].r) - xs.begin();
+    }
+
+    set<pair<int, int>> sxl, sxr;
+    for (int i = 0; i < n; ++i) {
+        sxl.insert({a[i].l, i});
+        sxr.insert({a[i].r, i});
+    }
+
+    int timer = 0;
+    while (!sxl.empty()) {
+        int i = sxr.begin()->second;
+        int j = (--sxl.end())->second;
+
+        sxr.erase(sxr.begin());
+        sxl.erase(--sxl.end());
+        if (i == j) continue;
+        sxl.erase({a[i].l, i});
+        sxr.erase({a[j].r, j});
+
+        if (a[i].is_intersect(a[j]) || a[j].is_intersect(a[i])) continue;
+        timer++;
+    }
+    cout << timer;
+}

@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+
+#include <ext/pb_ds/assoc_container.hpp>
+
+#pragma GCC optimize("O3,unroll-loops,fast-math")
+// #pragma GCC target("avx2,bmi2")
+
+// #define int long long
+
+using namespace std;
+using namespace chrono;
+
+using ll = long long;
+using ld = long double;
+using ull = unsigned long long;
+
+template<typename T, typename Cmp = less<T>>
+using ordered_set = __gnu_pbds::tree<T, __gnu_pbds::null_type, Cmp,
+__gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template<typename T>
+int sz(const T& x) {
+    return (int)x.size();
+}
+
+const int MAXN = 1e6;
+const int INF = 2e9;
+const int ALPH = 26;
+const int MAXLOG = 20;
+const ll MOD = 998244353;
+const ld EPS = 1e-8;
+
+const ull SEED = steady_clock::now().time_since_epoch().count();
+mt19937_64 rnd(67);
+
+struct Event {
+    int x, type;
+};
+
+struct Covered {
+    int a, b;
+};
+
+void solve() {
+    int n, q;
+    cin >> n >> q;
+    vector<Event> stings;
+    for (int i = 0; i < n; i++) {
+        int l, r;
+        cin >> l >> r;
+        stings.emplace_back(Event {l, 1});
+        stings.emplace_back(Event {r, -1});
+    }
+    sort(stings.begin(), stings.end(),
+    [](Event a, Event b) -> bool {
+        if (a.x == b.x) {
+            return a.type > b.type;
+        }
+        return a.x < b.x;
+    });
+    int balance = 0;
+    vector<Covered> best_covered;
+    for (int i = 0; i < 2 * n; i++) {
+        auto [x, type] = stings[i];
+        balance += type;
+        best_covered.emplace_back(Covered {balance,
+        min(((i + 1) - balance) / 2, (2 * n - (i + 1) - balance) / 2)});
+    }
+    vector<Covered> best_covered_1 = best_covered;
+    sort(best_covered_1.begin(), best_covered_1.end(),
+    [](Covered x, Covered y) {
+        if (x.a == y.a) {
+            return x.b > y.b;
+        }
+        return x.a > y.a;
+    });
+    vector<Covered> best_covered_2 = best_covered;
+    sort(best_covered_2.begin(), best_covered_2.end(),
+    [](Covered x, Covered y) {
+        if (x.b == y.b) {
+            return x.a > y.a;
+        }
+        return x.b > y.b;
+    });
+    vector<Covered> best_covered_3 = best_covered;
+    sort(best_covered_3.begin(), best_covered_3.end(),
+    [](Covered x, Covered y) {
+        return x.a + 2 * x.b > y.a + 2 * y.b;
+    });
+    vector<Covered> best_covered_4 = best_covered;
+    sort(best_covered_4.begin(), best_covered_4.end(),
+    [](Covered x, Covered y) {
+        return x.a + x.b > y.a + y.b;
+    });
+    if (n > 3000) {
+        best_covered_1.resize(min(sz(best_covered_1), 1000));
+        best_covered_2.resize(min(sz(best_covered_2), 1000));
+        best_covered_3.resize(min(sz(best_covered_3), 1000));
+        best_covered_4.resize(min(sz(best_covered_4), 1000));
+    } else {
+        best_covered_2.clear();
+        best_covered_3.clear();
+        best_covered_4.clear();
+    }
+    while (q--) {
+        int k;
+        cin >> k;
+        int ans = INF;
+        for (auto [a, b] : best_covered_1) {
+            ans = min(ans, min(max(0, (k - a + 1) / 2), b) + max(0, k - a - 2 * b));
+        }
+        for (auto [a, b] : best_covered_2) {
+            ans = min(ans, min(max(0, (k - a + 1) / 2), b) + max(0, k - a - 2 * b));
+        }
+        for (auto [a, b] : best_covered_3) {
+            ans = min(ans, min(max(0, (k - a + 1) / 2), b) + max(0, k - a - 2 * b));
+        }
+        for (auto [a, b] : best_covered_4) {
+            ans = min(ans, min(max(0, (k - a + 1) / 2), b) + max(0, k - a - 2 * b));
+        }
+        cout << ans << '\n';
+    }
+}
+
+int main() {
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+#endif
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int test_cases = 1;
+    // cin >> test_cases;
+    while (test_cases--) solve();
+    return 0;
+}

@@ -1,0 +1,108 @@
+#include "bits/stdc++.h"
+
+#pragma GCC optimize("03,unroll-loops")
+
+#define all(x) x.begin(), x.end()
+#define rall(x) x.rbegin(), x.rend()
+#define len(x) ((int)x.size())
+
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+const int inf = 1e9;
+
+void solve() {
+    int n, tt;
+    cin >> n >> tt;
+    vector<array<int, 2>> a(n);
+    vector<int> w;
+    for (auto &[l, r] : a) {
+        cin >> l >> r;
+        w.push_back(l);
+        w.push_back(r);
+    }
+    sort(all(w));
+    w.resize(unique(all(w)) - w.begin());
+    for (auto &[l, r] : a) {
+        l = lower_bound(all(w), l) - w.begin();
+        r = lower_bound(all(w), r) - w.begin();
+    }
+    w.clear();
+    int sz = 2 * n + 1;
+    w.resize(sz + 1);
+    vector<int> pr(sz + 1);
+    vector<int> sf(sz + 1);
+    for (auto [l, r] : a) {
+        ++w[l];
+        --w[r + 1];
+        ++pr[r + 1];
+        ++sf[l];
+    }
+    for (int i = 0; i < sz; ++i) {
+        pr[i + 1] += pr[i];
+    }
+    for (int i = sz - 1; i >= 0; --i) {
+        sf[i] += sf[i + 1];
+    }
+    int now = 0;
+    for (int i = 0; i < len(w); ++i) {
+        now += w[i];
+        w[i] = now;
+    }
+    vector dp(sz, vector<int> (n + 1, inf));
+    for (int i = 0; i < sz; ++i) dp[i][0] = 0;
+    for (int cnt = 1; cnt <= n; ++cnt) {
+        for (int i = 0; i < sz; ++i) {
+            if (w[i] >= cnt) {
+                dp[i][cnt] = 0;
+                continue;
+            }
+            int l = pr[i];
+            int r = sf[i + 1];
+            int mn = min(l, r);
+            int d = cnt - w[i];
+            if (2 * mn >= d) {
+                dp[i][cnt] = (d + 1) / 2;
+            } else {
+                d -= 2 * mn;
+                dp[i][cnt] = mn;
+                l = pr[i + 1] - pr[i];
+                r -= mn;
+                mn = min(l, r);
+                if (mn >= d) {
+                    dp[i][cnt] += d;
+                } else {
+                    dp[i][cnt] = inf;
+                }
+            }
+        }
+    }
+    vector<int> ans(n + 1, inf);
+    for (int cnt = 0; cnt <= n; ++cnt) {
+        for (int i = 0; i < n; ++i) {
+            ans[cnt] = min(ans[cnt], dp[i][cnt]);
+        }
+    }
+    while (tt--) {
+        int k;
+        cin >> k;
+        cout << ans[k] << ' ';
+    }
+
+    // cout << endl;
+    // for (auto [l, r] : a) {
+    //     cout << l << ' ' << r << endl;
+    // }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int _ = 1;
+    // cin >> _;
+    while (_--) {
+        solve();
+        cout << '\n';
+    }
+}
